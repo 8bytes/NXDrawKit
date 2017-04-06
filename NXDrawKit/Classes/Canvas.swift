@@ -12,6 +12,8 @@ import UIKit
 {
     @objc optional func canvas(_ canvas: Canvas, didUpdateDrawing drawing: Drawing, mergedImage image: UIImage?)
     @objc optional func canvas(_ canvas: Canvas, didSaveDrawing drawing: Drawing, mergedImage image: UIImage?)
+    @objc optional func canvas(_ canvas: Canvas, didStartDrawing drawing: Drawing)
+    @objc optional func canvas(_ canvas: Canvas, didStopDrawing drawing: Drawing)
     
     func brush() -> Brush?
 }
@@ -32,7 +34,7 @@ open class Canvas: UIView, UITableViewDelegate
     fileprivate var drawing = Drawing()
     fileprivate let path = UIBezierPath()
     fileprivate let scale = UIScreen.main.scale
-
+    
     fileprivate var saved = false
     fileprivate var pointMoved = false
     fileprivate var pointIndex = 0
@@ -63,7 +65,7 @@ open class Canvas: UIView, UITableViewDelegate
         
         self.addSubview(self.mainImageView)
         self.mainImageView.autoresizingMask = [.flexibleHeight ,.flexibleWidth]
-
+        
         self.addSubview(self.tempImageView)
         self.tempImageView.autoresizingMask = [.flexibleHeight ,.flexibleWidth]
     }
@@ -77,11 +79,11 @@ open class Canvas: UIView, UITableViewDelegate
         
         let data1 = UIImagePNGRepresentation(image1!)
         let data2 = UIImagePNGRepresentation(image2!)
-
+        
         if (data1 == nil || data2 == nil) {
             return false
         }
-
+        
         return (data1! == data2)
     }
     
@@ -114,9 +116,11 @@ open class Canvas: UIView, UITableViewDelegate
         return self.compare(self.drawing.background, isEqualTo: self.backgroundImageView.image)
     }
     
-
+    
     // MARK: - Override Methods
     open override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
+        
+        self.delegate?.canvas?(self, didStartDrawing: self.drawing)
         self.saved = false
         self.pointMoved = false
         self.pointIndex = 0
@@ -132,7 +136,7 @@ open class Canvas: UIView, UITableViewDelegate
          * http://code.tutsplus.com/tutorials/ios-sdk_freehand-drawing--mobile-13164
          *
          */
-
+        
         let touch = touches.first!
         let currentPoint = touch.location(in: self)
         self.pointMoved = true
@@ -143,7 +147,7 @@ open class Canvas: UIView, UITableViewDelegate
             // move the endpoint to the middle of the line joining the second control point of the first Bezier segment
             // and the first control point of the second Bezier segment
             self.points[3] = CGPoint(x: (self.points[2]!.x + self.points[4]!.x)/2.0, y: (self.points[2]!.y + self.points[4]!.y) / 2.0)
-
+            
             // add a cubic Bezier from pt[0] to pt[3], with control points pt[1] and pt[2]
             self.path.move(to: self.points[0]!)
             self.path.addCurve(to: self.points[3]!, controlPoint1: self.points[1]!, controlPoint2: self.points[2]!)
@@ -162,6 +166,8 @@ open class Canvas: UIView, UITableViewDelegate
     }
     
     open override func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent?) {
+        
+        self.delegate?.canvas?(self, didStopDrawing: self.drawing)
         if !self.pointMoved {   // touchesBegan -> touchesEnded : just touched
             self.path.move(to: self.points[0]!)
             self.path.addLine(to: self.points[0]!)
@@ -187,7 +193,7 @@ open class Canvas: UIView, UITableViewDelegate
         }
         
         self.path.stroke(with: brush.blendMode, alpha: 1)
-
+        
         let targetImageView = self.brush.isEraser ? self.mainImageView : self.tempImageView
         targetImageView.image = UIGraphicsGetImageFromCurrentImageContext()
         
@@ -269,7 +275,7 @@ open class Canvas: UIView, UITableViewDelegate
         self.saved = self.canSave()
         self.didUpdateCanvas()
     }
-
+    
     open func redo() {
         self.session.redo()
         self.updateByLastSession()
@@ -294,15 +300,15 @@ open class Canvas: UIView, UITableViewDelegate
     open func canUndo() -> Bool {
         return self.session.canUndo()
     }
-
+    
     open func canRedo() -> Bool {
         return self.session.canRedo()
     }
-
+    
     open func canClear() -> Bool {
         return self.session.canReset()
     }
-
+    
     open func canSave() -> Bool {
         return !(self.isStrokeEqual() && self.isBackgroundEqual())
     }
