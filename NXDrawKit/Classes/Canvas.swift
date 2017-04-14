@@ -30,7 +30,7 @@ open class Canvas: UIView, UITableViewDelegate
     fileprivate var backgroundImageView = UIImageView()
     
     fileprivate var brush = Brush()
-    fileprivate let session = Session()
+    open let session = Session()
     fileprivate var drawing = Drawing()
     fileprivate let path = UIBezierPath()
     fileprivate let scale = UIScreen.main.scale

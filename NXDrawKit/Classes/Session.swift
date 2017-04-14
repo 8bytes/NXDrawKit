@@ -8,10 +8,10 @@
 
 import UIKit
 
-class Session: NSObject
+open class Session: NSObject
 {
     fileprivate let maxSessionSize = 50
-    fileprivate var undoSessionList = [Drawing]()
+    open var undoSessionList = [Drawing]()
     fileprivate var redoSessionList = [Drawing]()
     fileprivate var backgroundSession: Drawing?
     
