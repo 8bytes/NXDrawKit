@@ -25,7 +25,7 @@ open class Canvas: UIView, UITableViewDelegate
     
     fileprivate var canvasId: String?
     
-    fileprivate var mainImageView = UIImageView()
+    open var mainImageView = UIImageView()
     fileprivate var tempImageView = UIImageView()
     fileprivate var backgroundImageView = UIImageView()
     
@@ -221,7 +221,8 @@ open class Canvas: UIView, UITableViewDelegate
             self.backgroundImageView.image?.draw(in: rect)            // draw background image
         }
         
-        self.mainImageView.image?.draw(in: self.bounds)               // draw stroke
+        UIImage(view: self.mainImageView).draw(in: self.bounds)
+        //        self.mainImageView.image?.draw(in: self.bounds)               // draw stroke
         
         let mergedImage = UIGraphicsGetImageFromCurrentImageContext()   // merge
         
@@ -291,7 +292,7 @@ open class Canvas: UIView, UITableViewDelegate
     }
     
     open func save() {
-        self.drawing.stroke = self.mainImageView.image?.copy() as? UIImage
+        self.drawing.stroke = UIImage(view: self.mainImageView)
         self.drawing.background = self.backgroundImageView.image
         self.saved = true
         self.didSaveCanvas()
@@ -313,3 +314,14 @@ open class Canvas: UIView, UITableViewDelegate
         return !(self.isStrokeEqual() && self.isBackgroundEqual())
     }
 }
+
+extension UIImage {
+    convenience init(view: UIView) {
+        UIGraphicsBeginImageContext(view.frame.size)
+        view.layer.render(in: UIGraphicsGetCurrentContext()!)
+        let image = UIGraphicsGetImageFromCurrentImageContext()
+        UIGraphicsEndImageContext()
+        self.init(cgImage: (image?.cgImage)!)
+    }
+}
+
