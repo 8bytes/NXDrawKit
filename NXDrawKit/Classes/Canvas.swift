@@ -60,7 +60,7 @@ open class Canvas: UIView, UITableViewDelegate
         self.backgroundColor = UIColor.white
         
         self.addSubview(self.backgroundImageView)
-        self.backgroundImageView.contentMode = .scaleAspectFit
+        self.backgroundImageView.contentMode = .scaleAspectFill
         self.backgroundImageView.autoresizingMask = [.flexibleHeight ,.flexibleWidth]
         
         self.addSubview(self.mainImageView)
