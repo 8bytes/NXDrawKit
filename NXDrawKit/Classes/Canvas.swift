@@ -57,10 +57,10 @@ open class Canvas: UIView, UITableViewDelegate
     
     // MARK: - Private Methods
     fileprivate func initialize() {
-        self.backgroundColor = UIColor.white
+        self.backgroundColor = UIColor.black
         
         self.addSubview(self.backgroundImageView)
-        self.backgroundImageView.contentMode = .scaleAspectFill
+        self.backgroundImageView.contentMode = .scaleAspectFit
         self.backgroundImageView.autoresizingMask = [.flexibleHeight ,.flexibleWidth]
         
         self.addSubview(self.mainImageView)
